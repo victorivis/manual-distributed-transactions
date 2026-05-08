@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.config;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;

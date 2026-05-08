@@ -1,4 +1,6 @@
-package com.example.demo;
+package com.example.demo.dao;
+
+import com.example.demo.entity.UserEntity;
 
 import java.util.List;
 
@@ -6,8 +8,9 @@ import java.util.List;
  * Contrato de acesso a dados para UserEntity.
  *
  * Implementado por:
- * - UserJpaDao: usa JPA/EntityManager (qualificador "jpa")
- * - UserJdbcDao: usa JDBC/DataSource diretamente (qualificador "jdbc")
+ * - UserJpaDao:   usa JPA/EntityManager   (qualificador "jpa")
+ * - UserJdbcDao:  usa JDBC/DataSource     (qualificador "jdbc")
+ * - UserMongoDao: usa MongoDB driver sync (qualificador "mongo")
  *
  * A implementação ativa é selecionada pela propriedade app.dao.impl
  * em application.properties.
