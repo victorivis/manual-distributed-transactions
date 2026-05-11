@@ -1,0 +1,141 @@
+{
+  "info": {
+    "_postman_id": "510e73c4-3ae4-41a1-abfc-815f78c9db0a",
+    "name": "Bancos Distribuidos",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54324265",
+    "_collection_link": "https://go.postman.co/collection/54324265-510e73c4-3ae4-41a1-abfc-815f78c9db0a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "listar",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"As Três Irmãs - Contos\",\n  \"author\": \"Anton Pavlovitch Tchekhov\",\n  \"totalPages\": 371,\n  \"currentPage\": 198,\n  \"comment\": \"\",\n  \"quotes\": [\n    \"Ta-ra-ra bum-di-é... Que importância tem tudo isso! Que importância tem tudo isso!\"\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{url}}/users",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "criar",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Alexis Zorba\",\n  \"email\": \"zorba@gmail.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/users",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "buscar por id",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"As Três Irmãs - Contos\",\n  \"author\": \"Anton Pavlovitch Tchekhov\",\n  \"totalPages\": 371,\n  \"currentPage\": 198,\n  \"comment\": \"\",\n  \"quotes\": [\n    \"Ta-ra-ra bum-di-é... Que importância tem tudo isso! Que importância tem tudo isso!\"\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{url}}/users/a9db0233-5815-4b91-93e7-3fcb5c5cd4fb",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "users",
+            "a9db0233-5815-4b91-93e7-3fcb5c5cd4fb"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "deletar",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"As Três Irmãs - Contos\",\n  \"author\": \"Anton Pavlovitch Tchekhov\",\n  \"totalPages\": 371,\n  \"currentPage\": 198,\n  \"comment\": \"\",\n  \"quotes\": [\n    \"Ta-ra-ra bum-di-é... Que importância tem tudo isso! Que importância tem tudo isso!\"\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{url}}/users/9a6f80a9-55c8-492b-a4d3-340f426d2913",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "users",
+            "9a6f80a9-55c8-492b-a4d3-340f426d2913"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "atualizar",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"Alexis Zorbas\",\r\n    \"email\": \"zorba2@gmail.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/users/ad4e4bee-88f1-4537-af4b-cf78ba35aafe",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "users",
+            "ad4e4bee-88f1-4537-af4b-cf78ba35aafe"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "url",
+      "value": ""
+    }
+  ]
+}
