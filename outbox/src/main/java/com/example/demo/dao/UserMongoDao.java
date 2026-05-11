@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.UUID;
 
 /**
  * Implementação MongoDB do UserDao.
@@ -34,9 +34,6 @@ public class UserMongoDao implements UserDao {
 
     private final MongoCollection<Document> collection;
 
-    // Gerador de ID simples para compatibilidade com a interface (Long id)
-    private final AtomicLong idCounter = new AtomicLong(1);
-
     public UserMongoDao(MongoClient mongoClient,
                         @Value("${app.mongo.database}") String database) {
         this.collection = mongoClient.getDatabase(database).getCollection("users");
@@ -45,14 +42,16 @@ public class UserMongoDao implements UserDao {
     @Override
     public void save(UserEntity user) {
         if (user.getId() == null) {
-            user.setId(idCounter.getAndIncrement());
+            user.setId(UUID.randomUUID());
         }
         collection.insertOne(toDocument(user));
     }
 
     @Override
-    public UserEntity findById(Long id) {
-        Document doc = collection.find(Filters.eq("id", id)).first();
+    public UserEntity findById(UUID id) {
+        Document doc = collection
+                .find(Filters.eq("sqlId", id.toString()))
+                .first();
         return doc != null ? toEntity(doc) : null;
     }
 
@@ -68,7 +67,7 @@ public class UserMongoDao implements UserDao {
     @Override
     public void update(UserEntity user) {
         collection.updateOne(
-                Filters.eq("id", user.getId()),
+                Filters.eq("sqlId", user.getId().toString()),
                 Updates.combine(
                         Updates.set("name",  user.getName()),
                         Updates.set("email", user.getEmail())
@@ -77,8 +76,8 @@ public class UserMongoDao implements UserDao {
     }
 
     @Override
-    public void delete(Long id) {
-        collection.deleteOne(Filters.eq("id", id));
+    public void delete(UUID id) {
+        collection.deleteOne(Filters.eq("sqlId", id.toString()));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -86,14 +85,14 @@ public class UserMongoDao implements UserDao {
     // ─────────────────────────────────────────────────────────────────────────
 
     private Document toDocument(UserEntity user) {
-        return new Document("id",    user.getId())
+        return new Document("sqlId", user.getId().toString())
                 .append("name",  user.getName())
                 .append("email", user.getEmail());
     }
 
     private UserEntity toEntity(Document doc) {
         UserEntity user = new UserEntity();
-        user.setId(doc.getLong("id"));
+        user.setId(UUID.fromString(doc.getString("sqlId")));
         user.setName(doc.getString("name"));
         user.setEmail(doc.getString("email"));
         return user;

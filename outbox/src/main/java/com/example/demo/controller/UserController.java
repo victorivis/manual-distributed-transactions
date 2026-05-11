@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Controlador REST para gerenciamento de usuários.
@@ -60,7 +61,7 @@ public class UserController {
      * Recupera um usuário específico por ID.
      */
     @GetMapping("/{id}")
-    public UserEntity getUser(@PathVariable Long id) {
+    public UserEntity getUser(@PathVariable UUID id) {
         return userDao.findById(id);
     }
 
@@ -76,7 +77,7 @@ public class UserController {
      * Atualiza um usuário existente.
      */
     @PutMapping("/{id}")
-    public void updateUser(@PathVariable Long id, @RequestBody UserEntity user) {
+    public void updateUser(@PathVariable UUID id, @RequestBody UserEntity user) {
         user.setId(id);
         userDao.update(user);
     }
@@ -85,7 +86,7 @@ public class UserController {
      * Remove um usuário.
      */
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
+    public void deleteUser(@PathVariable UUID id) {
         userDao.delete(id);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.demo.outbox;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Representa um evento pendente na tabela outbox.
@@ -21,7 +22,7 @@ import java.time.LocalDateTime;
  */
 public class OutboxEvent {
 
-    private Long          id;
+    private UUID          id;
     private String        eventType;   // ex: "USER_CREATED"
     private String        payload;     // JSON do usuário
     private boolean       processado;
@@ -36,13 +37,13 @@ public class OutboxEvent {
         this.criadoEm   = LocalDateTime.now();
     }
 
-    public Long          getId()          { return id; }
+    public UUID          getId()          { return id; }
     public String        getEventType()   { return eventType; }
     public String        getPayload()     { return payload; }
     public boolean       isProcessado()   { return processado; }
     public LocalDateTime getCriadoEm()    { return criadoEm; }
 
-    public void setId(Long id)                    { this.id         = id; }
+    public void setId(UUID id)                    { this.id         = id; }
     public void setEventType(String eventType)    { this.eventType  = eventType; }
     public void setPayload(String payload)        { this.payload    = payload; }
     public void setProcessado(boolean processado) { this.processado = processado; }

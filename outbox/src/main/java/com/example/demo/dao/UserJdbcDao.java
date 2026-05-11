@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Implementação JDBC do UserDao.
@@ -35,16 +36,15 @@ public class UserJdbcDao implements UserDao {
 
     @Override
     public void save(UserEntity user) {
-        String sql = "INSERT INTO users (name, email) VALUES (?, ?)";
+        String sql = "INSERT INTO users (id, name, email) VALUES (?, ?, ?)";
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
-            try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setString(1, user.getName());
-                ps.setString(2, user.getEmail());
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                user.setId(UUID.randomUUID());
+                ps.setObject(1, user.getId());
+                ps.setString(2, user.getName());
+                ps.setString(3, user.getEmail());
                 ps.executeUpdate();
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) user.setId(keys.getLong(1));
-                }
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -56,11 +56,11 @@ public class UserJdbcDao implements UserDao {
     }
 
     @Override
-    public UserEntity findById(Long id) {
+    public UserEntity findById(UUID id) {
         String sql = "SELECT id, name, email FROM users WHERE id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, id);
+            ps.setObject(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? mapRow(rs) : null;
             }
@@ -91,7 +91,7 @@ public class UserJdbcDao implements UserDao {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, user.getName());
                 ps.setString(2, user.getEmail());
-                ps.setLong(3, user.getId());
+                ps.setObject(3, user.getId());
                 ps.executeUpdate();
                 conn.commit();
             } catch (SQLException e) {
@@ -104,12 +104,12 @@ public class UserJdbcDao implements UserDao {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(UUID id) {
         String sql = "DELETE FROM users WHERE id = ?";
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setLong(1, id);
+                ps.setObject(1, id);
                 ps.executeUpdate();
                 conn.commit();
             } catch (SQLException e) {
@@ -123,7 +123,7 @@ public class UserJdbcDao implements UserDao {
 
     private UserEntity mapRow(ResultSet rs) throws SQLException {
         UserEntity user = new UserEntity();
-        user.setId(rs.getLong("id"));
+        user.setId(rs.getObject("id", UUID.class));
         user.setName(rs.getString("name"));
         user.setEmail(rs.getString("email"));
         return user;

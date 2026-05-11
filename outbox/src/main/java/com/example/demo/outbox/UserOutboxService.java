@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.UUID;
 
 /**
  * Serviço responsável pela escrita atômica no H2:
@@ -67,14 +68,13 @@ public class UserOutboxService {
     // ─────────────────────────────────────────────────────────────────────────
 
     private void insertUser(Connection conn, UserEntity user) throws SQLException {
-        String sql = "INSERT INTO users (name, email) VALUES (?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, user.getName());
-            ps.setString(2, user.getEmail());
+        String sql = "INSERT INTO users (id, name, email) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            user.setId(UUID.randomUUID());
+            ps.setObject(1, user.getId());
+            ps.setString(2, user.getName());
+            ps.setString(3, user.getEmail());
             ps.executeUpdate();
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) user.setId(keys.getLong(1));
-            }
         }
     }
 
@@ -84,7 +84,7 @@ public class UserOutboxService {
      */
     private String toJson(UserEntity user) {
         return String.format(
-                "{\"sqlId\":%d,\"name\":\"%s\",\"email\":\"%s\"}",
+                "{\"sqlId\":\"%s\",\"name\":\"%s\",\"email\":\"%s\"}",
                 user.getId(), user.getName(), user.getEmail());
     }
 

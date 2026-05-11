@@ -1,10 +1,12 @@
 package com.example.demo.entity;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.UUID;
 
 /**
  * Entidade JPA que representa um usuário no banco de dados.
@@ -20,8 +22,12 @@ import javax.persistence.Table;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    private UUID id;
 
     private String name;
 
@@ -34,11 +40,11 @@ public class UserEntity {
         this.email = email;
     }
 
-    public Long   getId()    { return id; }
+    public UUID   getId()    { return id; }
     public String getName()  { return name; }
     public String getEmail() { return email; }
 
-    public void setId(Long id)       { this.id    = id; }
+    public void setId(UUID id)       { this.id    = id; }
     public void setName(String name)  { this.name  = name; }
     public void setEmail(String email){ this.email = email; }
 

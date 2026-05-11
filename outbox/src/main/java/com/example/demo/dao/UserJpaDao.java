@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Implementação JPA do UserDao.
@@ -39,7 +40,7 @@ public class UserJpaDao implements UserDao {
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public UserEntity findById(Long id) {
+    public UserEntity findById(UUID id) {
         return entityManager.find(UserEntity.class, id);
     }
 
@@ -60,7 +61,7 @@ public class UserJpaDao implements UserDao {
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void delete(UUID id) {
         UserEntity user = findById(id);
         if (user != null) {
             entityManager.remove(user);

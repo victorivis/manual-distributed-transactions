@@ -84,7 +84,7 @@ public class OutboxRelay {
         }
 
         Document payload = Document.parse(event.getPayload());
-        Long sqlId = payload.getLong("sqlId");
+        String sqlId = payload.getString("sqlId");
 
         // Idempotência: só insere se ainda não existe documento com este sqlId
         boolean jaExiste = collection.find(Filters.eq("sqlId", sqlId)).first() != null;
