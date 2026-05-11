@@ -3,6 +3,7 @@ package com.example.demo.dao;
 import com.example.demo.entity.UserEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Contrato de acesso a dados para UserEntity.
@@ -17,8 +18,8 @@ import java.util.List;
  */
 public interface UserDao {
     void save(UserEntity user);
-    UserEntity findById(Long id);
+    UserEntity findById(UUID id);
     List<UserEntity> findAll();
     void update(UserEntity user);
-    void delete(Long id);
+    void delete(UUID id);
 }

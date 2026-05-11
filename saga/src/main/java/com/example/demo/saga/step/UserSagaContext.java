@@ -2,6 +2,8 @@ package com.example.demo.saga.step;
 
 import com.example.demo.entity.UserEntity;
 
+import java.util.UUID;
+
 /**
  * Contexto compartilhado entre todos os passos da saga de criação de usuário.
  *
@@ -22,13 +24,13 @@ public class UserSagaContext {
      * ID gerado pelo banco SQL (H2) após o INSERT do passo 1.
      * Preenchido por SaveToSqlStep.execute() e lido por SaveToSqlStep.compensate().
      */
-    private Long sqlGeneratedId;
+    private UUID sqlGeneratedId;
 
     /**
      * ID gerado pelo MongoDB após o INSERT do passo 2.
      * Preenchido por SaveToMongoStep.execute() e lido por SaveToMongoStep.compensate().
      */
-    private Long mongoGeneratedId;
+    private UUID mongoGeneratedId;
 
     public UserSagaContext(UserEntity user) {
         this.user = user;
@@ -36,9 +38,9 @@ public class UserSagaContext {
 
     public UserEntity getUser()               { return user; }
 
-    public Long getSqlGeneratedId()           { return sqlGeneratedId; }
-    public void setSqlGeneratedId(Long id)    { this.sqlGeneratedId = id; }
+    public UUID getSqlGeneratedId()           { return sqlGeneratedId; }
+    public void setSqlGeneratedId(UUID id)    { this.sqlGeneratedId = id; }
 
-    public Long getMongoGeneratedId()         { return mongoGeneratedId; }
-    public void setMongoGeneratedId(Long id)  { this.mongoGeneratedId = id; }
+    public UUID getMongoGeneratedId()         { return mongoGeneratedId; }
+    public void setMongoGeneratedId(UUID id)  { this.mongoGeneratedId = id; }
 }

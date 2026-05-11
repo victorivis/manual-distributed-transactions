@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -68,6 +70,7 @@ class UserSagaTest {
         int antes = userDao.findAll().size();
 
         UserEntity user = new UserEntity("Bob Saga", "bob@saga.com");
+        user.setId(UUID.randomUUID()); // Simula a geração de ID
         UserSagaContext ctx = new UserSagaContext(user);
 
         SagaOrchestrator<UserSagaContext> saga =
@@ -100,10 +103,12 @@ class UserSagaTest {
     void naoDeveAfestarNenhumBancosePassoUmFalha() {
         int antes = userDao.findAll().size();
 
-        UserSagaContext ctx = new UserSagaContext(new UserEntity("Carol Saga", "carol@saga.com"));
+        UserEntity user = new UserEntity("Charlie Saga", "charlie@saga.com");
+        user.setId(UUID.randomUUID());
+        UserSagaContext ctx = new UserSagaContext(user);
 
         SagaOrchestrator<UserSagaContext> saga =
-                new SagaOrchestrator<UserSagaContext>("CriarUsuario-FalhaNoPasso1")
+                new SagaOrchestrator<UserSagaContext>("CriarUsuario-FalhaSimulada-Passo1")
                         .addStep(new com.example.demo.saga.step.SagaStep<>() {
                             @Override
                             public void execute(UserSagaContext c) throws Exception {
@@ -113,12 +118,14 @@ class UserSagaTest {
                             public void compensate(UserSagaContext c) { /* nada a compensar */ }
                             @Override
                             public String name() { return "SqlStep-Falso"; }
-                        });
+                        })
+                        .addStep(saveToSqlStep); // Este passo não será executado
 
-        assertThrows(SagaException.class, () -> saga.run(ctx));
+        assertThrows(SagaException.class, () -> saga.run(ctx),
+                "Deve lançar SagaException quando o passo 1 falha");
 
         int depois = userDao.findAll().size();
         assertEquals(antes, depois,
-                "Nenhum dado deve ter sido persistido se o passo 1 falhou");
+                "Se o passo 1 falha, nenhum registro deve ser criado");
     }
 }

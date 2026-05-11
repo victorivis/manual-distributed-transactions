@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Implementação JDBC do UserDao.
@@ -35,16 +36,17 @@ public class UserJdbcDao implements UserDao {
 
     @Override
     public void save(UserEntity user) {
-        String sql = "INSERT INTO users (name, email) VALUES (?, ?)";
+        if (user.getId() == null) {
+            user.setId(UUID.randomUUID());
+        }
+        String sql = "INSERT INTO user_entity (id, name, email) VALUES (?, ?, ?)";
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
-            try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setString(1, user.getName());
-                ps.setString(2, user.getEmail());
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getId().toString());
+                ps.setString(2, user.getName());
+                ps.setString(3, user.getEmail());
                 ps.executeUpdate();
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) user.setId(keys.getLong(1));
-                }
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -56,11 +58,11 @@ public class UserJdbcDao implements UserDao {
     }
 
     @Override
-    public UserEntity findById(Long id) {
-        String sql = "SELECT id, name, email FROM users WHERE id = ?";
+    public UserEntity findById(UUID id) {
+        String sql = "SELECT id, name, email FROM user_entity WHERE id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, id);
+            ps.setString(1, id.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? mapRow(rs) : null;
             }
@@ -71,7 +73,7 @@ public class UserJdbcDao implements UserDao {
 
     @Override
     public List<UserEntity> findAll() {
-        String sql = "SELECT id, name, email FROM users";
+        String sql = "SELECT id, name, email FROM user_entity";
         List<UserEntity> users = new ArrayList<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -85,13 +87,13 @@ public class UserJdbcDao implements UserDao {
 
     @Override
     public void update(UserEntity user) {
-        String sql = "UPDATE users SET name = ?, email = ? WHERE id = ?";
+        String sql = "UPDATE user_entity SET name = ?, email = ? WHERE id = ?";
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, user.getName());
                 ps.setString(2, user.getEmail());
-                ps.setLong(3, user.getId());
+                ps.setString(3, user.getId().toString());
                 ps.executeUpdate();
                 conn.commit();
             } catch (SQLException e) {
@@ -104,12 +106,12 @@ public class UserJdbcDao implements UserDao {
     }
 
     @Override
-    public void delete(Long id) {
-        String sql = "DELETE FROM users WHERE id = ?";
+    public void delete(UUID id) {
+        String sql = "DELETE FROM user_entity WHERE id = ?";
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setLong(1, id);
+                ps.setString(1, id.toString());
                 ps.executeUpdate();
                 conn.commit();
             } catch (SQLException e) {
@@ -117,13 +119,16 @@ public class UserJdbcDao implements UserDao {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao remover usuário", e);
+            throw new RuntimeException("Erro ao deletar usuário", e);
         }
     }
 
     private UserEntity mapRow(ResultSet rs) throws SQLException {
         UserEntity user = new UserEntity();
-        user.setId(rs.getLong("id"));
+        String rawId = rs.getString("id");
+        if (rawId != null && !rawId.isBlank()) {
+            user.setId(UUID.fromString(rawId.trim()));
+        }
         user.setName(rs.getString("name"));
         user.setEmail(rs.getString("email"));
         return user;

@@ -8,7 +8,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.UUID;
 
 /**
  * Passo 2 da Saga: persiste o usuário no MongoDB.
@@ -28,9 +28,6 @@ public class SaveToMongoStep implements SagaStep<UserSagaContext> {
 
     private final MongoCollection<Document> collection;
 
-    // ID incremental para compatibilidade com a interface Long
-    private final AtomicLong idCounter = new AtomicLong(1);
-
     public SaveToMongoStep(MongoClient mongoClient,
                            @Value("${app.mongo.database}") String database) {
         this.collection = mongoClient.getDatabase(database).getCollection("users");
@@ -48,18 +45,16 @@ public class SaveToMongoStep implements SagaStep<UserSagaContext> {
     @Override
     public void execute(UserSagaContext ctx) throws Exception {
         UserEntity user = ctx.getUser();
-        long mongoId = idCounter.getAndIncrement();
+        UUID mongoId = user.getId(); // Usa o mesmo ID do passo SQL
         ctx.setMongoGeneratedId(mongoId);  // guarda para possível compensação
 
-        Document doc = new Document("id",    mongoId)
-                .append("sqlId", ctx.getSqlGeneratedId()) // referência cruzada ao SQL
+        Document doc = new Document("_id",   mongoId)
                 .append("name",  user.getName())
                 .append("email", user.getEmail());
 
         collection.insertOne(doc);  // MongoDB commita imediatamente (sem 2PC)
 
-        log("execute() → insertOne commitado, mongoId=" + mongoId
-                + ", sqlId=" + ctx.getSqlGeneratedId());
+        log("execute() → insertOne commitado, id=" + mongoId);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -68,17 +63,17 @@ public class SaveToMongoStep implements SagaStep<UserSagaContext> {
 
     @Override
     public void compensate(UserSagaContext ctx) {
-        Long mongoId = ctx.getMongoGeneratedId();
+        UUID mongoId = ctx.getMongoGeneratedId();
         if (mongoId == null) {
             log("compensate() → nada a desfazer (execute não chegou a commitar)");
             return;
         }
 
         try {
-            long deleted = collection.deleteOne(Filters.eq("id", mongoId)).getDeletedCount();
-            log("compensate() → deleteOne mongoId=" + mongoId + " (" + deleted + " doc(s) removido(s))");
+            long deleted = collection.deleteOne(Filters.eq("_id", mongoId)).getDeletedCount();
+            log("compensate() → deleteOne id=" + mongoId + " (" + deleted + " doc(s) removido(s))");
         } catch (Exception e) {
-            log("compensate() → ERRO ao deletar mongoId=" + mongoId + ": " + e.getMessage());
+            log("compensate() → ERRO ao deletar id=" + mongoId + ": " + e.getMessage());
             // Em produção: registrar em dead-letter collection para retentativa.
         }
     }
